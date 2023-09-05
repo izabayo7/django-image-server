@@ -25,4 +25,4 @@ urlpatterns = [
 ]
 
 # Add a pattern for serving media files under the 'images/' path
-urlpatterns += static(settings.MEDIA_URL + 'images/', document_root=settings.MEDIA_ROOT + '/images/')
+# urlpatterns += static(settings.MEDIA_URL + 'images/', document_root=settings.MEDIA_ROOT + '/images/')

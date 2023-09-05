@@ -1,62 +1,62 @@
+import os
 import time
 
-from django.shortcuts import render, get_object_or_404
-
-import os
-from django.shortcuts import render
-from django.http import JsonResponse
-
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from .models import Image
-import uuid  # Import the 'uuid' module
 
 
-def get_all_image_ids(request):
+@api_view(['GET'])
+def get_all(request):
     images = Image.objects.all()
-    image_ids = [str(image.id) for image in images]  # Convert UUIDs to strings
-    return JsonResponse({'image_ids': image_ids})
+    # sort by uuid desc
+    images = sorted(images, key=lambda image: image.name, reverse=True)
+    return Response([{'id': image.id, 'name': image.name} for image in images])
 
+
+@api_view(['GET'])
 def serve_image(request, image_id):
     image = get_object_or_404(Image, id=image_id)
-    # Pass context data to the template
-    context = {
-        'title': image.name,  # Use the image name as the title
-        'heading': 'Image Details',
-        'image_url': image.path.url,  # Use the image URL from the 'path' field
-    }
-    print(context)
-    return render(request, 'serve_image.html', context)
+    image_file = image.path
+
+    # Serve the image file using FileResponse
+    response = FileResponse(open(image_file.path, 'rb'), content_type='image/png')
+    response['Content-Disposition'] = f'inline; filename="{image_file.name}"'
+
+    return response
 
 
-def update_image(request, image_id):
-    image = get_object_or_404(Image, id=image_id)
-
-    if request.method == 'POST':
-        # Handle image updates here, using 'image_id' as the UUID identifier
-        # You can use request.FILES['image'] to get the new image file
-        # Don't forget to save the updated image and update other attributes as needed.
-
-        # Example: Updating the title
-        new_title = request.POST.get('title', image.title)
-        image.title = new_title
-        image.save()
-
-        return JsonResponse({'success': True})
-    else:
-        return JsonResponse({'success': False, 'error': 'Invalid request method'})
-
-
+@api_view(['POST'])
 def upload_image(request):
-    if request.method == 'POST' and request.FILES.get('image'):
-        uploaded_image = request.FILES['image']
+    image_to_update_id = request.query_params.get('update', None)
+    new_image_file = request.data.get('image', None)
 
-        # Generate a unique name by appending a timestamp (converted to a number)
+    if new_image_file:
+        # Generate a unique name for the image file
         timestamp = int(time.time())
-        image_name = f'image_{timestamp}_{uploaded_image.name}'
+        image_name = f'image_{timestamp}_{new_image_file.name}'
 
-        # Save the image with the unique name
-        image = Image(name=image_name, path=uploaded_image)
-        image.save()
+        if image_to_update_id:
+            # Update an existing image
+            image_to_update = get_object_or_404(Image, id=image_to_update_id)
 
-        return JsonResponse({'success': True, 'image_id': image.id})
+            # Delete the old image file if needed
+            if os.path.exists(image_to_update.path.path):
+                os.remove(image_to_update.path.path)
+
+            # Update the image model with the new file path and name
+            image_to_update.path = new_image_file
+            image_to_update.name = image_name
+            image_to_update.save()
+
+            return Response({'success': True, 'image_id': image_to_update.id})
+        else:
+            # Create a new image
+            image = Image(name=image_name, path=new_image_file)
+            image.save()
+
+            return Response({'success': True, 'image_id': image.id})
     else:
-        return JsonResponse({'success': False, 'error': 'Invalid request method or missing image'})
+        return Response({'success': False, 'error': 'Invalid request: Missing image_file'})

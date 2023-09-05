@@ -1,12 +1,15 @@
-from django.urls import path, re_path
-
+from django.urls import path
 from . import views
 
 app_name = 'image_app'
 
 urlpatterns = [
-    re_path(r'^(?P<image_id>[0-9a-f-]+)/$', views.serve_image, name='serve_image'),
-    re_path(r'^(?P<image_id>[0-9a-f-]+)/update/$', views.update_image, name='update_image'),
-    path('all/', views.get_all_image_ids, name='get_all_image_ids'),
-    path('upload/', views.upload_image, name='upload_image'),
+    # Endpoint to get all image IDs
+    path('', views.get_all, name='get-all-image-ids'),
+
+    # Endpoint to serve an individual image by ID
+    path('<uuid:image_id>/', views.serve_image, name='serve-image'),
+
+    # Endpoint to upload a new image or edit an existing one
+    path('upload/', views.upload_image, name='upload-image'),
 ]
