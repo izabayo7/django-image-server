@@ -4,9 +4,11 @@ import FilerobotImageEditor, {
   TOOLS,
 } from 'react-filerobot-image-editor';
 
+import './App.css'
+
 function App() {
 
-    const [isImgEditorShown, setIsImgEditorShown] = useState(false);
+    const [isImgEditorShown, setIsImgEditorShown] = useState(true);
 
     const openImgEditor = () => {
       setIsImgEditorShown(true);
@@ -19,7 +21,7 @@ function App() {
   return (
     <>
       <div>
-        <button onClick={openImgEditor}>Open Filerobot image editor</button>
+        {/* <button onClick={openImgEditor}>Open Filerobot image editor</button> */}
         {isImgEditorShown && (
           <FilerobotImageEditor
             source="https://scaleflex.airstore.io/demo/stephen-walker-unsplash.jpg"
@@ -73,7 +75,14 @@ function App() {
                 },
               ],
             }}
-            tabsIds={[TABS.ADJUST, TABS.ANNOTATE, TABS.WATERMARK]} // or {['Adjust', 'Annotate', 'Watermark']}
+            tabsIds={[
+              TABS.ADJUST,
+              TABS.FINETUNE,
+              TABS.FILTERS,
+              TABS.WATERMARK,
+              TABS.ANNOTATE,
+              TABS.RESIZE,
+            ]} // or {['Adjust', 'Annotate', 'Watermark']}
             defaultTabId={TABS.ANNOTATE} // or 'Annotate'
             defaultToolId={TOOLS.TEXT} // or 'Text'
           />
