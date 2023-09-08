@@ -51,12 +51,12 @@ def upload_image(request):
             image_to_update.name = image_name
             image_to_update.save()
 
-            return Response({'success': True, 'image_id': image_to_update.id})
+            return Response({'success': True, 'id': image_to_update.id, 'name': image_to_update.name})
         else:
             # Create a new image
             image = Image(name=image_name, path=new_image_file)
             image.save()
 
-            return Response({'success': True, 'image_id': image.id})
+            return Response({'success': True, 'id': image.id, 'name': image.name})
     else:
         return Response({'success': False, 'error': 'Invalid request: Missing image_file'})
