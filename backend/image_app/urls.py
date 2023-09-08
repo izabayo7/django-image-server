@@ -12,4 +12,7 @@ urlpatterns = [
 
     # Endpoint to upload a new image or edit an existing one
     path('upload/', views.upload_image, name='upload-image'),
+
+    # Endpoint to delete an existing image
+    path('<uuid:image_id>/delete/', views.delete_image, name='delete-image'),
 ]

@@ -1,19 +1,34 @@
 version: '3.4'
 
 services:
-  imageserver:
-    image: imageserver
+  backend:
+    image: image_server:latest
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - DB_NAME=image_server
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=db
+      - DB_PORT=5432
     ports:
-      - 8000:8000
+      - "8000:8000"
+    restart: always
+    depends_on:
+      - db
 
   db:
-    image: postgres
+    image: postgres:latest
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    ports:
-      - 5432:5432
+      - POSTGRES_DB=image_server
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+  frontend:
+    image: image_client:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    network_mode: "host"
+    restart: always

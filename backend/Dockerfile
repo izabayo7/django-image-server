@@ -1,29 +1,24 @@
-# For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:3.10-slim
+# Use the official Python 3.10.12 image as the base image
+FROM python:3.10.12-slim
 
+# Set environment variables to avoid buffering issues and enable colorized output
+ENV PYTHONUNBUFFERED 1
+ENV TERM xterm
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the requirements file to the container
+COPY requirements.txt /app/
+
+# Install Python dependencies
+RUN pip install -r requirements.txt
+
+# Copy the entire project directory to the container
+COPY . /app/
+
+# Expose port 8000 to the outside world (this is the default for Django development server)
 EXPOSE 8000
 
-# Keeps Python from generating .pyc files in the container
-ENV PYTHONDONTWRITEBYTECODE=1
-
-# Turns off buffering for easier container logging
-ENV PYTHONUNBUFFERED=1
-
-# Install pip requirements
-COPY requirements.txt .
-RUN python -m pip install -r requirements.txt
-
-
-WORKDIR /app
-COPY . /app
-
-# run the migration
-RUN python manage.py migrate
-
-# Creates a non-root user with an explicit UID and adds permission to access the /app folder
-# For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers
-RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app
-USER appuser
-
-# During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "image_server.wsgi"]
+# Start the Django development server
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

@@ -60,3 +60,16 @@ def upload_image(request):
             return Response({'success': True, 'id': image.id, 'name': image.name})
     else:
         return Response({'success': False, 'error': 'Invalid request: Missing image_file'})
+
+@api_view(['DELETE'])
+def delete_image(request, image_id):
+    image = get_object_or_404(Image, id=image_id)
+
+    # Delete the image file if needed
+    if os.path.exists(image.path.path):
+        os.remove(image.path.path)
+
+    # Delete the image model
+    image.delete()
+
+    return Response({'success': True})
