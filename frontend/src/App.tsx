@@ -111,11 +111,7 @@ function App() {
           name: data.name,
           url: `http://localhost:8000/gallery/${data.id}/?${Date.now()}`,
         };
-        setImages([
-          image,
-          ...images.filter((img) => img.id !== id),
-        ]);
-
+        setImages([image, ...images.filter((img) => img.id !== id)]);
       });
   };
 
@@ -156,6 +152,19 @@ function App() {
     );
   };
 
+  const deleteImage = async (id: string) => {
+    const response = await fetch(`http://localhost:8000/gallery/${id}/delete/`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: { success: boolean } = await response.json();
+
+    if (data.success) setImages(images.filter((image) => image.id !== id));
+  };
+
   useEffect(() => {
     if (!activeImage) return;
 
@@ -170,6 +179,7 @@ function App() {
   }, []);
 
   useEffect(() => {
+    setIsImgEditorShown(false);
     if (images.length > 0) {
       setActiveImage(images[0]);
     }
@@ -195,7 +205,16 @@ function App() {
                         setActiveImage(image);
                       }}
                       title={image.name}
-                    ></div>
+                    >
+                      <div
+                        className="delete-icon"
+                        title="Delete image"
+                        onClick={() => {
+                          deleteImage(image.id);
+                        }}
+                        id="deleteIcon"
+                      ></div>
+                    </div>
                   ))}
                 </div>
                 <input
@@ -393,7 +412,7 @@ function App() {
                   previewPixelRatio={0}
                 />
               ) : (
-                <div className="plugin-spinner"></div>
+                images.length ? <div className="plugin-spinner"></div> : <div className="no-images">No images found, upload one!</div>
               )}
             </div>
           </div>

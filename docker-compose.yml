@@ -14,7 +14,7 @@ services:
       - DB_PORT=5432
     ports:
       - "8000:8000"
-    restart: always
+    restart: unless-stopped
     depends_on:
       - db
 
@@ -24,6 +24,7 @@ services:
       - POSTGRES_DB=image_server
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    restart: unless-stopped
 
   frontend:
     image: image_client:latest
@@ -31,4 +32,4 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     network_mode: "host"
-    restart: always
+    restart: unless-stopped
