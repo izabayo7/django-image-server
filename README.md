@@ -5,7 +5,7 @@
 
 ```bash
 # (1) clone the project
-$ git clone https://gitlab.bitsort.io/fishbox/annotate.git
+$ git clone https://github.com/izabayo7/django-image-server.git
 
 # (2) build the images and run the containers
 $ sudo docker-compose build
